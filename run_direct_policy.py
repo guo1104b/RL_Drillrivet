@@ -3,29 +3,6 @@
 """
 Direct deterministic policy control without Gym wrappers.
 
-- You script Bill's actions yourself in CoppeliaSim (or via vrep.ActionRunner).
-- This script only:
-    * connects to VrepInterface
-    * collects observations like in DrillRivetEnv._get_obs
-    * (optionally) normalizes obs using provided stats (npz with 'mean','var')
-    * loads a trained SB3 model
-    * queries deterministic actions and drives the robot at each sim step
-
-Usage:
-  python run_direct_policy.py --ckpt ./models/sac_last.zip --target 3 --port 23000 --steps 250
-  python run_direct_policy.py --ckpt ./models/sac_last.zip --target 3 --stats-npz ./obs_stats.npz --steps 300
-  python run_direct_policy.py --ckpt ./models/td3.zip --algo td3 --target 3 --sleep 0.0
-
-Stats file (optional):
-  np.savez('obs_stats.npz', mean=mean_vec, var=var_vec)
-  where mean/var are length-32 arrays matching the observation ordering below.
-
-Observation ordering (dim=32):
-  [ q(6), qdot(6), p_ee(3), target_pose(3), theta(1), theta_y(1),
-    p_h(2), u_h(1), p_hand(3), u_hand(1), phase_oh(5) ]
-
-Success condition (mirrors your env defaults):
-  d < 0.005  and  |theta| < 0.1 rad  and  |theta_y| < 0.05 rad
 """
 
 import argparse
@@ -40,11 +17,10 @@ from vrep2 import VrepInterface
 
 # with open('trained_models/final.pkl', 'rb') as f:
 #     vn = pickle.load(f)
-# # vn 是 VecNormalize 对象
 # mean = vn.obs_rms.mean
 # var = vn.obs_rms.var
 # np.savez('obs_stats_final.npz', mean=mean, var=var)
-# print("✅ 导出成功：obs_stats_final.npz")
+# print("✅ Saved：obs_stats_final.npz")
 
 def phase_onehot(pid: int, n_phase: int = 5) -> np.ndarray:
     oh = np.zeros(n_phase, dtype=np.float32)
