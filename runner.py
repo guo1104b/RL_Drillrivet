@@ -55,13 +55,13 @@ class ActionRunner:
         meta = item.get("meta", {})
         if meta.get("phase_id") is not None:
             self._phase_id = int(meta["phase_id"])
-            item["_set_phase"] = True  # 记录：这个动作设置过 phase
+            item["_set_phase"] = True  
         else:
             item["_set_phase"] = False
 
         if meta.get("target_id") is not None:
             self._target_id = int(meta["target_id"])
-            item["_set_target"] = True  # 记录：这个动作设置过 target
+            item["_set_target"] = True 
         else:
             item["_set_target"] = False
 
