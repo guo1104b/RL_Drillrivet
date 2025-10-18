@@ -1,4 +1,3 @@
-# r_dist权重大一点
 # Environment in gymnasium style
 # -*- coding: utf-8 -*-
 import time
@@ -8,18 +7,12 @@ import numpy as np
 from vrep2 import VrepInterface
 
 class DrillRivetEnv(gym.Env):
-    """
-    A阶段：只训练“到就位点 + 对孔法向对齐 + 人机同步 + 机身不碰撞”。
-
-    obs = concat([q(6), qdot(6), p_ee(3), target_pose(3), theta(1), theta_y(1), p_h(2), u_h(1), p_hand(3), u_hand(1)])
-
-    action = joint velocity ∈ [-0.1, 0.1]
-    """
+    
     def __init__(self, port):
         super().__init__()
 
         self.v = VrepInterface(port)
-        self.q0 = self.v.get_joint_positions() # 需要改
+        self.q0 = self.v.get_joint_positions() 
         self.v.start()
         self.target = 3
         self.u_h = 1
@@ -50,8 +43,7 @@ class DrillRivetEnv(gym.Env):
         self.prev_theta_y = float(abs(np.deg2rad(ang_wy)))
 
         self.action_space = gym.spaces.Box(low=-0.05, high=0.05, shape=(6,), dtype=np.float32)
-        # 观测空间维度：6 + 6 + 3 + 3 + 3+ 1 + 3 + 4 =
-        # q, qdot, p_ee(relative), target_pose, theta,theta_y, p_h二维(relative), u_h, p_hand(relative), u_hand
+        
         self.observation_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(32,), dtype=np.float32)
 
     # ----------------- Gym API -----------------
@@ -146,8 +138,8 @@ class DrillRivetEnv(gym.Env):
         #q, qdot, p_ee(relative), ori_ee, p_target, p_h(relative 2 dimension), u_h, p_hand(relative), u_hand
         q = np.array(self.v.get_joint_positions())
         qdot = np.array(self.v.get_joint_velocities())
-        target_pose = self.v.targets_pos[self.target - 1] # 之后要修改
-        place_pose = self.v.places_pos[self.target - 1]  # 之后要修改
+        target_pose = self.v.targets_pos[self.target - 1] 
+        place_pose = self.v.places_pos[self.target - 1]  
         ee_pos = self.v.get_object_position(self.v.ee)
         p_ee = np.array(ee_pos) - np.array(target_pose)
         # ori_ee = np.array(self.v.get_object_orientation(self.v.ee))
@@ -192,7 +184,7 @@ class DrillRivetEnv(gym.Env):
         terminated = False
         truncated = False
         # -------------- Distance ------------------
-        d = float(np.linalg.norm(p_ee))  # 与目标的欧氏距离
+        d = float(np.linalg.norm(p_ee))  
         dh = float(np.linalg.norm(p_hand))
         derr = abs(d-dh)
         # print(f"d is {d}, dh is {dh}, derr is {derr}")
@@ -220,7 +212,7 @@ class DrillRivetEnv(gym.Env):
         # r_ang += (self.prev_theta - theta) + 0.5 * (self.prev_theta_y - theta_y)
         # self.prev_theta, self.prev_theta_y = theta, theta_y
         r_ang = - 2 * (theta ** 2 + theta_y ** 2)
-        # 近端调姿态
+        
         # r_ang = w_gate2 * (0.6 * bowl(theta, np.deg2rad(12)) + 0.4 * bowl(theta_y, np.deg2rad(15)))
 
         # ----------- Collision penalty -----------
@@ -229,7 +221,7 @@ class DrillRivetEnv(gym.Env):
 
         # ------------ Suppress jitter ------------
         adot = (np.asarray(action, float) - self.prev_action) / self.dt
-        # w_gate3 = 0.7 + 0.3 * (1.0 - self.smoothstep(d, hi=0.8, lo=0.2)) #改上下限或者去掉门限
+        # w_gate3 = 0.7 + 0.3 * (1.0 - self.smoothstep(d, hi=0.8, lo=0.2)) 
         w_gate3 = 0.7 + 0.3 * self.smoothstep(d, hi=0.2, lo=0.02)
         r_smooth = - 0.05 * float(np.dot(adot, adot)) * w_gate3
         self.prev_action = np.asarray(action, float)
@@ -292,14 +284,12 @@ class DrillRivetEnv(gym.Env):
         t = np.clip((hi - x) / (hi - lo), 0.0, 1.0)
         return t * t * (3 - 2 * t)
 
-    def bowl(self, a, a_star):  # a<=a_star 给正值，之外为0
+    def bowl(self, a, a_star):  
         x = float(a) / float(a_star)
         return max(1.0 - x * x, 0.0)
 
     def phase_onehot(self, pid: int) -> np.ndarray:
-        """
-        将整数 phase_id 映射为 one-hot；当 pid==-1（无活动阶段）时返回全零。
-        """
+        
         oh = np.zeros(self.n_phase, dtype=np.float32)
         if 0 <= int(pid) < self.n_phase:
             oh[int(pid)] = 1.0
@@ -321,12 +311,12 @@ class DrillRivetEnv(gym.Env):
         return q, qdot, p_ee, target_pose, theta, theta_y, p_h, u_h, p_hand, u_hand
 
     def sample_k_curriculum(self):
-        # 进度 0→1（达到 k_curriculum_steps 后封顶）
+        
         nearest = (self.total_steps // 50000) * 50000
         prog = min(1.0, nearest / float(self.k_curriculum_steps))
-        # 起始分布：几乎都是 1；目标分布：5/20 占大头
-        p0 = np.array([0.80, 0.10, 0.10], dtype=float)  # 初始分布
-        p1 = np.array([0.40, 0.30, 0.30], dtype=float)  # 目标分布
+       
+        p0 = np.array([0.80, 0.10, 0.10], dtype=float)  
+        p1 = np.array([0.40, 0.30, 0.30], dtype=float)  
         p = (1 - prog) * p0 + prog * p1
         p = p / p.sum()
 
@@ -343,8 +333,8 @@ class DrillRivetEnv(gym.Env):
             # p1 = np.full(6, 0.16, dtype=float)
             # p1[2] = 0.2
             # p = (1 - prog2) * p0 + prog2 * p1
-            p0 = np.array([0.10, 0.10, 0.80], dtype=float)  # 初始分布
-            p1 = np.array([0.30, 0.30, 0.40], dtype=float)  # 目标分布
+            p0 = np.array([0.10, 0.10, 0.80], dtype=float)  
+            p1 = np.array([0.30, 0.30, 0.40], dtype=float) 
             p = (1 - prog) * p0 + prog * p1
             p = p / p.sum()
             # return int(np.random.choice(np.arange(1, 7), p=p))
@@ -361,7 +351,7 @@ if __name__ == "__main__":
     trunc = False
     # while not (done or trunc):
     for _ in range(250):
-        a = env.action_space.sample()  # 随机动作测试
+        a = env.action_space.sample()  
         obs, r, done, trunc, info = env.step(a)
         # print(r, info)
     env.close()
