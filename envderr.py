@@ -280,7 +280,7 @@ class DrillRivetEnv(gym.Env):
         t = np.clip((hi - x) / (hi - lo), 0.0, 1.0)
         return t * t * (3 - 2 * t)
 
-    def bowl(self, a, a_star):  # a<=a_star 给正值，之外为0
+    def bowl(self, a, a_star):  
         x = float(a) / float(a_star)
         return max(1.0 - x * x, 0.0)
 
