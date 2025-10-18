@@ -219,7 +219,7 @@ class DrillRivetEnv(gym.Env):
 
         # ------------ Suppress jitter ------------
         adot = (np.asarray(action, float) - self.prev_action) / self.dt
-        # w_gate3 = 0.7 + 0.3 * (1.0 - self.smoothstep(d, hi=0.8, lo=0.2)) #改上下限或者去掉门限
+        # w_gate3 = 0.7 + 0.3 * (1.0 - self.smoothstep(d, hi=0.8, lo=0.2)) 
         w_gate3 = 0.7 + 0.3 * self.smoothstep(d, hi=0.2, lo=0.02)
         r_smooth = - 0.05 * float(np.dot(adot, adot)) * w_gate3
         self.prev_action = np.asarray(action, float)
