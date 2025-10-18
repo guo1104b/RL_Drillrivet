@@ -9,13 +9,7 @@ from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, Check
 from envderr import DrillRivetEnv
 
 def sync_envs_normalization(src: VecNormalize, dest: VecNormalize) -> None:
-    """
-    手动同步两个 VecNormalize 的观测归一化统计量
-    （均值、方差、计数），避免 eval_env 和 train_env 不一致。
-
-    :param src: 训练用的 VecNormalize
-    :param dest: 评估用的 VecNormalize
-    """
+   
     if not isinstance(src, VecNormalize) or not isinstance(dest, VecNormalize):
         raise TypeError("Both envs must be VecNormalize instances")
 
@@ -25,7 +19,7 @@ def sync_envs_normalization(src: VecNormalize, dest: VecNormalize) -> None:
 
 class CrossProcEvalCallback(EvalCallback):
     def _on_step(self) -> bool:
-        # 每次评估前把统计从训练 env 拷到 eval env
+        
         due = self.eval_freq > 0 and (self.n_calls % self.eval_freq == 0)
         if due and isinstance(self.training_env, VecNormalize) and isinstance(self.eval_env, VecNormalize):
             sync_envs_normalization(self.training_env, self.eval_env)
@@ -92,7 +86,6 @@ def main():
     total_steps = 3000000
     model.learn(total_timesteps=total_steps, callback=[ckpt_cb, tb_cb], tb_log_name="derr", log_interval=10)
 
-    # 保存模型与 VecNormalize 统计量
     model.save("trained_models/final_sac_model_derr")
     if isinstance(train_env, VecNormalize):
         train_env.save("trained_models/vecnorm_derr.pkl")
