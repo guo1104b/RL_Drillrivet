@@ -29,7 +29,7 @@ class VrepInterface:
         self.Hand = self.sim.getObject('/rightHand_tip')
         self.fuselage = self.sim.getObject('/Fuselage')
         self.center_pos = self.sim.getObjectPosition(self.fuselage, -1)
-        self.axis_dir = [0, 1, 0]  # 圆柱轴沿世界 y
+        self.axis_dir = [0, 1, 0]  
         self.tcp = self.sim.getObject('/drill')
 
         self.Robot = self.sim.getObject('/kuka_kr120')
@@ -236,7 +236,6 @@ class VrepInterface:
     #     if isinstance(obj, (np.floating, np.integer, np.bool_)):
     #         return obj.item()
     #     if isinstance(obj, np.ndarray):
-    #         # 若 API 需要 list，就转成 list；需要 bytes 就另外处理
     #         return obj.astype(float).tolist()
     #     if isinstance(obj, (list, tuple)):
     #         return [_py(x) for x in obj]
