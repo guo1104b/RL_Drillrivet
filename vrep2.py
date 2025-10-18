@@ -29,7 +29,7 @@ class VrepInterface:
         self.Hand = self.sim.getObject('/rightHand_tip')
         self.fuselage = self.sim.getObject('/Fuselage')
         self.center_pos = self.sim.getObjectPosition(self.fuselage, -1)
-        self.axis_dir = [0, 1, 0]  # 圆柱轴沿世界 y
+        self.axis_dir = [0, 1, 0]  
         self.tcp = self.sim.getObject('/drill')
 
         self.Robot = self.sim.getObject('/kuka_kr120')
@@ -303,7 +303,6 @@ class VrepInterface:
                 self.sim.clearIntegerSignal('Waypoint_Done')
                 break
 
-    # vrep.py
     def clear_runner_queue(self):
         try:
             while self.runner.is_busy():
