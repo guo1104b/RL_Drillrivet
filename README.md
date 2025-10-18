@@ -1,5 +1,6 @@
 # RL_Drillrivet
-In Coppeliasim developed a scene of human robot collaboration and trained model using SAC algorithm to achieve human-robot synchronization.
+In Coppeliasim developed a scene of human robot collaboration and trained model using SAC algorithm to achieve human-robot synchronization: when the human moves toward the target hole at different speeds, the robot’s end effector can also reach the corresponding position on the outer surface of the aircraft fuselage synchronously.
+
 
 # Prerequisites: 
 In Coppeliasim environment (version 4.9.0) open the scene file RL_drillrivet.ttt. 
